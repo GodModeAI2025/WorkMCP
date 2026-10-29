@@ -132,9 +132,9 @@ CREATE INDEX IF NOT EXISTS idx_edges_dst ON edges (dst, type);
 CREATE INDEX IF NOT EXISTS idx_edges_type ON edges (type);
 """
 
+# rowid of the FTS table = records.id, so replacing an entry is an indexed delete
 _FTS_SCHEMA = """
 CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(
-    record_id UNINDEXED,
     source UNINDEXED,
     kind UNINDEXED,
     title,
@@ -330,10 +330,19 @@ class KnowledgeStore:
 
     def _init_fts(self) -> bool:
         try:
+            columns = [r[1] for r in self._conn.execute("PRAGMA table_info(search_index)")]
+            if "record_id" in columns:  # layout of early development versions: rebuild
+                self._conn.execute("DROP TABLE search_index")
             self._conn.executescript(_FTS_SCHEMA)
-            return True
         except sqlite3.OperationalError:
             return False
+        if "record_id" in columns:
+            for row in self._conn.execute("SELECT id, source, kind, title, data FROM records").fetchall():
+                self._conn.execute(
+                    "INSERT INTO search_index (rowid, source, kind, title, body) VALUES (?,?,?,?,?)",
+                    (row["id"], row["source"], row["kind"], row["title"] or "", _text_from(json.loads(row["data"]))),
+                )
+        return True
 
     def close(self) -> None:
         with self._lock:
@@ -480,9 +489,9 @@ class KnowledgeStore:
     ) -> None:
         if not self.fts_enabled:
             return
-        conn.execute("DELETE FROM search_index WHERE record_id = ?", (record_id,))
+        conn.execute("DELETE FROM search_index WHERE rowid = ?", (record_id,))
         conn.execute(
-            "INSERT INTO search_index (record_id, source, kind, title, body) VALUES (?,?,?,?,?)",
+            "INSERT INTO search_index (rowid, source, kind, title, body) VALUES (?,?,?,?,?)",
             (record_id, source, kind, title or "", body or ""),
         )
 
@@ -704,7 +713,7 @@ class KnowledgeStore:
                 clauses.append("kind = ?")
                 args.append(kind)
             sql = (
-                "SELECT record_id, bm25(search_index, 0.0, 0.0, 0.0, 4.0, 1.0) AS score FROM search_index WHERE "
+                "SELECT rowid AS record_id, bm25(search_index, 0.0, 0.0, 4.0, 1.0) AS score FROM search_index WHERE "
                 + " AND ".join(clauses)
                 + " ORDER BY score LIMIT ?"
             )

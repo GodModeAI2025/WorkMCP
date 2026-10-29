@@ -163,3 +163,24 @@ def test_diff_nested_paths() -> None:
 def test_fts_query_is_safe() -> None:
     assert fts_query('Bäcker "OR" -- drop') == '"bäcker"* OR "or" OR "drop"*'
     assert fts_query("  ") is None
+
+
+def test_fts_layout_migration(tmp_path) -> None:
+    """Databases with the early FTS layout (record_id column) are rebuilt and stay searchable."""
+    import sqlite3
+
+    path = tmp_path / "alt.db"
+    s1 = KnowledgeStore(path)
+    s1.upsert_record("berufenet", "beruf", "1", {"name": "Bäcker/in"}, title="Bäcker/in")
+    s1.close()
+    conn = sqlite3.connect(path)
+    conn.execute("DROP TABLE search_index")
+    conn.execute(
+        "CREATE VIRTUAL TABLE search_index USING fts5("
+        "record_id UNINDEXED, source UNINDEXED, kind UNINDEXED, title, body)"
+    )
+    conn.commit()
+    conn.close()
+    s2 = KnowledgeStore(path)
+    assert s2.search("Bäcker")[0][0].key == "1"
+    s2.close()
