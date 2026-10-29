@@ -2,7 +2,21 @@
 
 Der Ordner [`WorkMCP/`](WorkMCP/) enthält die Projektdokumentation als **Archivy-Notizen**. [Archivy](https://github.com/archivy/archivy) ist eine selbst gehostete Wissensdatenbank. Jede Notiz ist eine Markdown-Datei `{id}-{titel}.md` mit YAML-Front-Matter (`type`, `title`, `date`, `modified_at`, `tags`, `id`, `path`). Notizen verlinken sich mit `[[Titel|ID]]`.
 
-## In Archivy laden
+## Schnellstart mit Docker
+
+Im Repository-Wurzelverzeichnis:
+
+```bash
+cp .env.example .env
+```
+
+```bash
+docker compose up -d --build
+```
+
+Archivy läuft dann unter http://localhost:5000 mit den Zugangsdaten aus `.env`, die Doku ist im Ordner **WorkMCP** vorinstalliert. Das Image (`deploy/archivy/`) konfiguriert Archivy ohne Assistenten und kopiert die Notizen bei jedem Start neu. Der WorkMCP-Server im selben Compose-Projekt exportiert gemerkte Berufe direkt in diesen Ordner.
+
+## In eine bestehende Archivy-Installation laden
 
 1. Archivy installieren und einrichten (siehe [Archivy-Doku](https://archivy.github.io)):
 

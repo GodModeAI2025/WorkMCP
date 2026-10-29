@@ -1,0 +1,4 @@
+# Eigene Ignore-Datei für dieses Image (BuildKit): nur Entrypoint und Doku-Notizen in den Kontext
+*
+!deploy/archivy/entrypoint.sh
+!docs/archivy/WorkMCP

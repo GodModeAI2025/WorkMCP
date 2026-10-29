@@ -267,6 +267,10 @@
         <div>
           <h3>Claude Code (lokal, stdio)</h3>
           <pre><code>claude mcp add workmcp -- uvx --from git+https://github.com/GodModeAI2025/WorkMCP workmcp</code></pre>
+          <h3>Docker: WorkMCP + Archivy</h3>
+          <pre><code>cp .env.example .env
+docker compose up -d --build</code></pre>
+          <p style="color:var(--muted);font-size:14.5px;margin-top:-6px">Archivy unter localhost:5000 mit vorinstallierter Doku, WorkMCP unter localhost:8000/mcp. <code>export_knowledge('archivy')</code> schreibt direkt nach Archivy.</p>
           <h3>Zentral (Streamable HTTP)</h3>
           <pre><code>workmcp --transport streamable-http --host 0.0.0.0 --port 8000
 claude mcp add --transport http workmcp http://&lt;server&gt;:8000/mcp</code></pre>

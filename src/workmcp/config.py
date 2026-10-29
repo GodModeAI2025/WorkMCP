@@ -102,6 +102,9 @@ class Settings:
     # job details can contain contact persons; they are removed before storing unless enabled
     store_personal_data: bool = field(default_factory=lambda: _env_bool("STORE_PERSONAL_DATA"))
 
+    # default target of export_knowledge('archivy'): an Archivy data directory (notes go into <dir>/WorkMCP)
+    archivy_dir: str | None = field(default_factory=lambda: _env("ARCHIVY_DIR"))
+
     # optional default locations of reference files (URL or local path)
     kldb_source: str | None = field(default_factory=lambda: _env("KLDB_SOURCE"))
     kldb_isco_source: str | None = field(default_factory=lambda: _env("KLDB_ISCO_SOURCE"))

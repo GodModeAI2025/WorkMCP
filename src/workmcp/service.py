@@ -947,7 +947,8 @@ class KnowledgeService(OccupationMixin):
         if fmt == "archivy":
             from .archivy import export_archivy
 
-            target = Path(pfad or Path(self.settings.db_path).expanduser().parent / "archivy").expanduser()
+            default = self.settings.archivy_dir or Path(self.settings.db_path).expanduser().parent / "archivy"
+            target = Path(pfad or default).expanduser()
             return export_archivy(self.store, target)
         nodes, edges = self.store.iter_graph()
         ext = {"json": "json", "cypher": "cypher", "graphml": "graphml"}.get(fmt)

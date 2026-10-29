@@ -1,0 +1,50 @@
+# WorkMCP (zentraler MCP-Server) + Archivy (Wissensdatenbank mit WorkMCP-Doku).
+#
+#   cp .env.example .env      # Passwort setzen
+#   docker compose up -d --build
+#
+#   Archivy:  http://localhost:5000      (Login aus .env)
+#   WorkMCP:  http://localhost:8000/mcp  (z. B. claude mcp add --transport http workmcp http://localhost:8000/mcp)
+#
+# Beide Dienste sind nur lokal gebunden (127.0.0.1). WorkMCP hat keine eigene Authentifizierung –
+# für den Zugriff aus dem Netz einen Reverse Proxy mit Zugangsschutz vorschalten.
+# export_knowledge('archivy') schreibt die gemerkten Berufe direkt in den Archivy-Ordner WorkMCP/.
+
+services:
+  archivy:
+    build:
+      context: .
+      dockerfile: deploy/archivy/Dockerfile
+      args:
+        PYTHON_IMAGE: ${ARCHIVY_PYTHON_IMAGE:-python:3.11-slim}
+    environment:
+      ARCHIVY_ADMIN_USER: ${ARCHIVY_ADMIN_USER:-admin}
+      ARCHIVY_ADMIN_PASSWORD: ${ARCHIVY_ADMIN_PASSWORD:?ARCHIVY_ADMIN_PASSWORD in .env setzen (mindestens 8 Zeichen)}
+    ports:
+      - "127.0.0.1:${ARCHIVY_PORT:-5000}:5000"
+    volumes:
+      - archivy-data:/archivy
+    restart: unless-stopped
+
+  workmcp:
+    build:
+      context: .
+      args:
+        PYTHON_IMAGE: ${WORKMCP_PYTHON_IMAGE:-python:3.13-slim}
+    environment:
+      WORKMCP_DB: /data/knowledge.db
+      WORKMCP_ARCHIVY_DIR: /archivy/data
+      # Host-Header-Prüfung gegen DNS-Rebinding; localhost ist immer erlaubt, für einen Reverse Proxy dessen Namen ergänzen
+      WORKMCP_ALLOWED_HOSTS: ${WORKMCP_ALLOWED_HOSTS:-localhost:*}
+      WORKMCP_ADZUNA_APP_ID: ${WORKMCP_ADZUNA_APP_ID:-}
+      WORKMCP_ADZUNA_APP_KEY: ${WORKMCP_ADZUNA_APP_KEY:-}
+    ports:
+      - "127.0.0.1:${WORKMCP_PORT:-8000}:8000"
+    volumes:
+      - workmcp-data:/data
+      - archivy-data:/archivy
+    restart: unless-stopped
+
+volumes:
+  archivy-data:
+  workmcp-data:

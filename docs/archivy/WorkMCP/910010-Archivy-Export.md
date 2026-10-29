@@ -27,6 +27,10 @@ export_knowledge('archivy', pfad='/pfad/zum/archivy/data')
 - **IDs:** ab **900001**, stabil über wiederholte Exporte (Datei `.workmcp-archivy-ids.json` im Ordner). Ein erneuter Export aktualisiert die Notizen statt Duplikate anzulegen.
 - **Front-Matter:** wie von Archivy selbst geschrieben: `type: note`, `title`, `date` (mm-dd-yy), `modified_at` (mm/dd/yy HH:MM), `tags`, `id`, `path`.
 
+## Mit Docker Compose
+
+Im Compose-Projekt des Repositorys teilen sich WorkMCP und Archivy das Archivy-Volume (`WORKMCP_ARCHIVY_DIR=/archivy/data`). Ein Aufruf von `export_knowledge('archivy')` ohne Pfad genügt; die Notizen erscheinen sofort in Archivy. Getestet am 29.10.2026.
+
 ## Zusammen mit der Doku nutzen
 
 Die Projektdokumentation (IDs 910001–910010) liegt im selben Ordner `WorkMCP/`. Einmal kopiert, steht in Archivy Doku und Daten nebeneinander und ist gemeinsam durchsuchbar.

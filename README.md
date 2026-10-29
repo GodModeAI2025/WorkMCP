@@ -60,7 +60,23 @@ uvx --from git+https://github.com/GodModeAI2025/WorkMCP workmcp --transport stre
 claude mcp add --transport http workmcp http://<server>:8000/mcp
 ```
 
-Der HTTP-Modus hat keine eigene Authentifizierung. Betreibe ihn nur im internen Netz oder hinter einem Reverse Proxy mit Zugangsschutz.
+Der HTTP-Modus hat keine eigene Authentifizierung. Betreibe ihn nur im internen Netz oder hinter einem Reverse Proxy mit Zugangsschutz. Mit `--allowed-host mcp.firma.de` (mehrfach möglich) oder `WORKMCP_ALLOWED_HOSTS` prüft der Server zusätzlich den Host-Header (Schutz vor DNS-Rebinding). Das Compose-Setup aktiviert diese Prüfung standardmäßig für localhost.
+
+**Docker: WorkMCP und Archivy zusammen** (zentraler MCP-Server plus Wissensdatenbank mit vorinstallierter Doku):
+
+```bash
+cp .env.example .env
+```
+
+```bash
+docker compose up -d --build
+```
+
+- Archivy: http://localhost:5000 (Login aus `.env`). Die Doku liegt im Ordner **WorkMCP**.
+- WorkMCP: `http://localhost:8000/mcp`, in Claude Code mit `claude mcp add --transport http workmcp http://localhost:8000/mcp`.
+- `export_knowledge('archivy')` schreibt die gemerkten Berufe direkt in denselben Archivy-Ordner. Beide Container teilen sich das Archivy-Volume (`WORKMCP_ARCHIVY_DIR=/archivy/data`).
+- Beide Ports sind nur an 127.0.0.1 gebunden. Bei Docker-Hub-Rate-Limits lassen sich in `.env` Spiegel-Images setzen (`ARCHIVY_PYTHON_IMAGE`, `WORKMCP_PYTHON_IMAGE`).
+- Getestet am 29.10.2026 mit Docker 29.9 und Compose v5.6: Start ohne Assistent, Login, Doku-Notizen sichtbar, Export aus WorkMCP erscheint sofort in Archivy, Neustart idempotent.
 
 **Projektkonfiguration `.mcp.json`:**
 
@@ -182,6 +198,8 @@ Die Spalten werden an Kopfzeilen und Wertformen erkannt, Titelzeilen stören nic
 | `WORKMCP_ADZUNA_APP_ID` / `_APP_KEY` | – | aktiviert Adzuna (kostenloser Key) |
 | `WORKMCP_STORE_PERSONAL_DATA` | `0` | Kontaktfelder aus Stellenanzeigen speichern |
 | `WORKMCP_KLDB_SOURCE`, `_KLDB_ISCO_SOURCE`, `_ESCO_ONET_SOURCE` | – | Standardquellen für den Import |
+| `WORKMCP_ARCHIVY_DIR` | – | Archivy-Datenverzeichnis als Standardziel von `export_knowledge('archivy')` |
+| `WORKMCP_ALLOWED_HOSTS` | – | erlaubte Host-Header für streamable-http, kommagetrennt (wie `--allowed-host`) |
 | `WORKMCP_BA_*`, `WORKMCP_ESCO_BASE`, `WORKMCP_HN_BASE` … | siehe `src/workmcp/config.py` | Endpunkte und Client-IDs überschreiben |
 
 ## Graph-Modell

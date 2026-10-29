@@ -47,6 +47,23 @@ claude mcp add --transport http workmcp http://<host>:8000/mcp
 
 Der HTTP-Modus bringt **keine eigene Authentifizierung** mit. Nur intern betreiben oder hinter einem Reverse Proxy mit Zugangsschutz. Alle Clients teilen sich dann ein gemeinsames Gedächtnis.
 
+## Docker Compose: WorkMCP und Archivy
+
+```bash
+cp .env.example .env
+```
+
+```bash
+docker compose up -d --build
+```
+
+| Dienst | Adresse | Inhalt |
+|---|---|---|
+| Archivy | http://localhost:5000 | Wissensdatenbank mit dieser Doku (Ordner WorkMCP), Login aus `.env` |
+| WorkMCP | http://localhost:8000/mcp | MCP-Server (Streamable HTTP), Gedächtnis im Volume `workmcp-data` |
+
+`export_knowledge('archivy')` schreibt ohne weitere Angaben in den Archivy-Ordner WorkMCP, siehe [[Archivy-Export|910010]]. Beide Ports sind nur lokal gebunden, WorkMCP prüft zusätzlich den Host-Header (`WORKMCP_ALLOWED_HOSTS`, Standard `localhost:*`).
+
 ## Weitere Harnesses
 
 - **Projektdatei `.mcp.json`:** `command: "uvx"`, `args: ["--from", "git+https://github.com/GodModeAI2025/WorkMCP", "workmcp"]`.
@@ -59,6 +76,7 @@ Der HTTP-Modus bringt **keine eigene Authentifizierung** mit. Nur intern betreib
 |---|---|
 | `--transport stdio\|streamable-http` | Transport (Standard stdio) |
 | `--host`, `--port` | für streamable-http (Standard 127.0.0.1:8000) |
+| `--allowed-host HOST[:PORT]` | erlaubter Host-Header (mehrfach, Standard aus `WORKMCP_ALLOWED_HOSTS`), aktiviert den DNS-Rebinding-Schutz auch bei `--host 0.0.0.0` |
 | `--db PFAD` | Wissensdatenbank (überschreibt `WORKMCP_DB`) |
 | `--offline` | nur Gedächtnis, keine Netzzugriffe |
 
