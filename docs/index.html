@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorkMCP – Job-Graph Deutschland</title>
+<meta name="description" content="WorkMCP: MCP-Server für einen deutschen Job-Graphen – Stellen, Berufe, Aufgaben, Skills, Gehälter und Automatisierungssignale aus öffentlichen Quellen, mit versioniertem Gedächtnis.">
+<style>
+  :root {
+    --bg: #f7f7f4;
+    --surface: #ffffff;
+    --surface-2: #f0efe9;
+    --text: #1d1d1b;
+    --muted: #5d5c57;
+    --line: #dddcd4;
+    --accent: #1f5f8b;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3eef6;
+    --good: #2f6b3a;
+    --good-soft: #e4f1e6;
+    --warn: #8a5a00;
+    --warn-soft: #fbf0d9;
+    --bad: #9b2c2c;
+    --bad-soft: #f8e3e3;
+    --code-bg: #f3f2ec;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    --radius: 14px;
+    --max: 1120px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413;
+      --surface: #1d1d1b;
+      --surface-2: #262623;
+      --text: #ecebe4;
+      --muted: #a9a79f;
+      --line: #34332f;
+      --accent: #7db8e0;
+      --accent-ink: #0d1a24;
+      --accent-soft: #1d2f3c;
+      --good: #8cc99a;
+      --good-soft: #1f3324;
+      --warn: #e2b866;
+      --warn-soft: #3a2f17;
+      --bad: #ee9a9a;
+      --bad-soft: #3b2222;
+      --code-bg: #232320;
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --surface: #1d1d1b; --surface-2: #262623; --text: #ecebe4; --muted: #a9a79f; --line: #34332f;
+    --accent: #7db8e0; --accent-ink: #0d1a24; --accent-soft: #1d2f3c; --good: #8cc99a; --good-soft: #1f3324;
+    --warn: #e2b866; --warn-soft: #3a2f17; --bad: #ee9a9a; --bad-soft: #3b2222; --code-bg: #232320; --shadow: none;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+  .brand { font-weight: 700; letter-spacing: .2px; text-decoration: none; color: var(--text); }
+  .brand span { color: var(--accent); }
+  nav.links { margin-left: auto; display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+  nav.links a { color: var(--muted); text-decoration: none; font-size: 15px; white-space: nowrap; }
+  nav.links a:hover { color: var(--text); }
+  .hero { padding: 64px 0 40px; }
+  .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft);
+    padding: 4px 10px; border-radius: 999px; }
+  h1 { font-size: clamp(30px, 5vw, 50px); line-height: 1.1; margin: 16px 0 14px; letter-spacing: -.5px; }
+  .lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); max-width: 760px; margin: 0 0 26px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--surface); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .hero-panel { margin-top: 36px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .panel h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 14px; font-weight: 600; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); }
+  .chip.new { background: var(--good-soft); color: var(--good); border-color: transparent; }
+  .chip.chg { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .chip.gone { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 15px; }
+  .flow .node { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-weight: 600; }
+  .flow .arrow { color: var(--muted); }
+  section { padding: 48px 0; }
+  section h2 { font-size: clamp(24px, 3.4vw, 32px); margin: 0 0 8px; letter-spacing: -.3px; }
+  section .sub { color: var(--muted); margin: 0 0 26px; max-width: 760px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .steps { counter-reset: step; display: grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; position: relative; }
+  .step::before { counter-increment: step; content: counter(step); display: inline-grid; place-items: center; width: 28px; height: 28px;
+    border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+  .step h3 { margin: 0 0 4px; font-size: 16px; }
+  .step p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto;
+    font-size: 13.5px; line-height: 1.55; margin: 8px 0 18px; }
+  code { font-size: .92em; }
+  :not(pre) > code { background: var(--code-bg); padding: 1px 5px; border-radius: 5px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin: 1px 4px 1px 0; white-space: nowrap; }
+  .b-free { background: var(--good-soft); color: var(--good); }
+  .b-key { background: var(--accent-soft); color: var(--accent); }
+  .b-inoff { background: var(--warn-soft); color: var(--warn); }
+  .b-lic { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .two > *, .grid > *, .steps > *, .hero-panel > * { min-width: 0; }
+  pre code { white-space: pre; }
+  .tools { columns: 2; column-gap: 28px; padding-left: 18px; margin: 0; }
+  .tools li { break-inside: avoid; margin-bottom: 6px; }
+  .legal { background: var(--surface); border: 2px solid var(--warn); border-radius: var(--radius); padding: 24px; }
+  .legal h2 { display: flex; align-items: center; gap: 10px; }
+  .legal ol { padding-left: 20px; margin: 12px 0 0; }
+  .legal li { margin-bottom: 10px; }
+  .legal .note { background: var(--warn-soft); color: var(--text); border-radius: 10px; padding: 12px 14px; margin-top: 16px; font-size: 15px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .hero-panel, .two { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid, .steps { grid-template-columns: 1fr; }
+    .tools { columns: 1; }
+    nav.links { gap: 14px; }
+    .hero { padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">Work<span>MCP</span></a>
+    <nav class="links" aria-label="Seitennavigation">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#gedaechtnis">Gedächtnis</a>
+      <a href="#quellen">Quellen</a>
+      <a href="#start">Schnellstart</a>
+      <a href="#recht">Rechtliches</a>
+      <a href="https://github.com/GodModeAI2025/WorkMCP">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <span class="eyebrow">MCP-Server · Open Source · lokal betrieben</span>
+    <h1>Der Job-Graph für Deutschland, als Kontext für jedes Agent-Harness.</h1>
+    <p class="lead">WorkMCP verbindet Stellenanzeigen, Berufe, Aufgaben, Skills, Gehälter und Automatisierungssignale aus öffentlichen Quellen zu einem Graphen. Jeder Abruf wird gemerkt, neue und geänderte Daten werden versioniert ergänzt.</p>
+    <div class="cta">
+      <a class="btn primary" href="#start">Schnellstart</a>
+      <a class="btn" href="https://github.com/GodModeAI2025/WorkMCP">Code auf GitHub</a>
+      <a class="btn" href="https://github.com/GodModeAI2025/WorkMCP/blob/HEAD/FAKTENCHECK.md">Faktencheck</a>
+    </div>
+    <div class="hero-panel">
+      <div class="panel">
+        <h3>Vom Beruf zur Automatisierung</h3>
+        <div class="flow">
+          <span class="node">Rolle</span><span class="arrow">→</span>
+          <span class="node">KldB · ISCO · ESCO · O*NET</span><span class="arrow">→</span>
+          <span class="node">Aufgaben</span><span class="arrow">→</span>
+          <span class="node">Skills</span><span class="arrow">→</span>
+          <span class="node">Automatisierung</span>
+        </div>
+        <p style="color:var(--muted);margin:14px 0 0;font-size:15px">Ein Aufruf von <code>get_role_context('Buchhalter')</code> liefert Zuordnung, Aufgaben, Skills, Medianentgelt und Marktsignal.</p>
+      </div>
+      <div class="panel">
+        <h3>Erneuter Abruf, Delta im Gedächtnis</h3>
+        <div class="chips">
+          <span class="chip new">neu: 3</span>
+          <span class="chip chg">geändert: 1 (Version 2)</span>
+          <span class="chip gone">nicht mehr enthalten: 2</span>
+          <span class="chip">unverändert: 19</span>
+        </div>
+        <p style="color:var(--muted);margin:14px 0 0;font-size:15px">Alte Versionen bleiben erhalten. Nichts wird stillschweigend überschrieben oder gelöscht.</p>
+      </div>
+    </div>
+  </div>
+
+  <section id="funktionen">
+    <div class="wrap">
+      <h2>Was WorkMCP kann</h2>
+      <p class="sub">24 Tools und ein Analyse-Prompt für Claude Code, OpenCode und andere MCP-fähige Harnesses, per stdio lokal oder per Streamable HTTP zentral.</p>
+      <div class="grid">
+        <div class="card"><h3>Stellen aus drei Quellen</h3><p>BA-Jobsuche als Deutschland-Kern, Arbeitnow mit Remote- und Visa-Filter, ATS-Karriereseiten direkt (Greenhouse, Lever, Ashby, Personio, Workday u. a.) mit Abteilung und Seniority.</p></div>
+        <div class="card"><h3>Berufe und Aufgaben</h3><p>BERUFENET-Tätigkeiten mit KldB-Code, ESCO-Skills (essential/optional), O*NET Task Statements (Core/Supplemental), KldB-Hierarchie als Jobfamilien.</p></div>
+        <div class="card"><h3>Crosswalks</h3><p>KldB ↔ ISCO-08 ↔ ESCO ↔ O*NET ↔ BERUFENET, auch über mehrere Stufen. Grundlage sind importierte amtliche Tabellen.</p></div>
+        <div class="card"><h3>Gehaltsbänder</h3><p>Amtliche Medianentgelte mit Quartilen aus dem Entgeltatlas der BA, nach Region, Niveau, Branche. Optional Gehalts-Histogramme aus Adzuna.</p></div>
+        <div class="card"><h3>Automatisierungssignale</h3><p>Hacker-News-Berichte zu automatisierten Tätigkeiten, verknüpfbar mit Aufgaben. Bewertungen mit Arbeitszeitanteil speichert das Modell per <code>record_extraction</code>.</p></div>
+        <div class="card"><h3>Graph und Export</h3><p>Knoten und Kanten mit Herkunft, Export als JSON, Neo4j-Cypher, GraphML oder als verlinkte Archivy-Wissensdatenbank.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gedaechtnis">
+    <div class="wrap">
+      <h2>Das Gedächtnis: merken und ergänzen</h2>
+      <p class="sub">Alles liegt lokal in einer SQLite-Datenbank: Datensätze, Versionen, ein Änderungsprotokoll, Abruf-Läufe, ein Volltextindex und der Graph.</p>
+      <div class="steps">
+        <div class="step"><h3>Anfrage</h3><p>Innerhalb der Gültigkeitsdauer kommt die Antwort sofort aus dem Speicher.</p></div>
+        <div class="step"><h3>Abruf</h3><p>Ein Inhalts-Hash je Datensatz entscheidet: neu, geändert oder unverändert.</p></div>
+        <div class="step"><h3>Ergänzen</h3><p>Geänderte Daten bekommen eine neue Version mit feldgenauem Diff, verschwundene einen Status.</p></div>
+        <div class="step"><h3>Ausfallsicher</h3><p>Ist eine Quelle nicht erreichbar, kommt der letzte Stand mit Warnung. Ein Offline-Modus ist eingebaut.</p></div>
+      </div>
+      <pre><code>"gedaechtnis": {
+  "aus_speicher": false, "stand": "2026-10-29T09:12:04+00:00",
+  "delta": { "neu": ["10002-1000000001-S"],
+             "geaendert": [{"schluessel": "10000-1184867112-S", "version": 2,
+                            "aenderungen": [{"feld": "stellenangebotsTitel", "alt": "Buchhalter (m/w/d)", "neu": "… – Teilzeit"}]}],
+             "nicht_mehr_enthalten": ["10001-1002716922-S"], "unveraendert": 19 } }</code></pre>
+    </div>
+  </section>
+
+  <section id="quellen">
+    <div class="wrap">
+      <h2>Datenquellen</h2>
+      <p class="sub">Nur kostenlose Quellen. Ob eine Quelle erreichbar ist, prüft <code>check_sources</code> vom eigenen Rechner aus. Lizenzen und Bedingungen siehe <a href="#recht">Rechtlicher Hinweis</a>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quelle</th><th>Inhalt</th><th>Zugang</th><th>Lizenz/Bedingungen (selbst prüfen)</th></tr></thead>
+          <tbody>
+            <tr><td>BA-Jobsuche, BERUFENET, Entgeltatlas</td><td>Stellen, Berufe mit Tätigkeiten und KldB-Code, Medianentgelte</td><td><span class="badge b-free">kostenlos</span><span class="badge b-inoff">inoffiziell</span></td><td>keine offiziell angebotene API; Entgeltatlas: Quellenangabe „Statistik der BA“</td></tr>
+            <tr><td>ESCO (EU-Kommission)</td><td>Berufe, Skills, ISCO-Gruppen</td><td><span class="badge b-free">kostenlos</span><span class="badge b-free">ohne Key</span></td><td>Nutzungsbedingungen des ESCO-Portals</td></tr>
+            <tr><td>O*NET (USDOL/ETA)</td><td>Task Statements, Berufe</td><td><span class="badge b-free">kostenlos</span><span class="badge b-free">ohne Key</span></td><td><span class="badge b-lic">CC BY 4.0</span> Namensnennung erforderlich</td></tr>
+            <tr><td>KldB 2010, Umsteigeschlüssel, ESCO↔O*NET</td><td>Klassifikation und Crosswalks (Dateiimport)</td><td><span class="badge b-free">kostenlos</span></td><td>Quellenangabe der Herausgeber</td></tr>
+            <tr><td>Arbeitnow</td><td>aggregierte ATS-Feeds</td><td><span class="badge b-free">kostenlos</span><span class="badge b-free">ohne Key</span></td><td>Bedingungen von Arbeitnow</td></tr>
+            <tr><td>ATS-Karriereseiten</td><td>Greenhouse, Lever, Ashby, Workable, Recruitee, Personio, SmartRecruiters, BambooHR, Workday</td><td><span class="badge b-free">kostenlos</span><span class="badge b-free">ohne Login</span></td><td>robots.txt und Bedingungen der Arbeitgeber und Anbieter</td></tr>
+            <tr><td>Adzuna</td><td>Gehalts-Histogramme, Top-Arbeitgeber</td><td><span class="badge b-key">kostenloser Key, optional</span></td><td>Adzuna-API-Bedingungen</td></tr>
+            <tr><td>Hacker News, Common Crawl</td><td>Automatisierungssignale, archivierte Karriereseiten</td><td><span class="badge b-free">kostenlos</span><span class="badge b-free">ohne Key</span></td><td>Inhalte der Verfassenden bzw. Seitenbetreiber</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="sub" style="margin-top:14px">Bewusst nicht integriert: LinkedIn, Indeed, StepStone und XING (AGB verbieten Scraping), Interamt (keine Lese-API), Apify (kostenpflichtig).</p>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <h2>Schnellstart</h2>
+      <p class="sub">Voraussetzungen: Python ≥ 3.10 und <a href="https://docs.astral.sh/uv/">uv</a>.</p>
+      <div class="two">
+        <div>
+          <h3>Claude Code (lokal, stdio)</h3>
+          <pre><code>claude mcp add workmcp -- uvx --from git+https://github.com/GodModeAI2025/WorkMCP workmcp</code></pre>
+          <h3>Zentral (Streamable HTTP)</h3>
+          <pre><code>workmcp --transport streamable-http --host 0.0.0.0 --port 8000
+claude mcp add --transport http workmcp http://&lt;server&gt;:8000/mcp</code></pre>
+          <p style="color:var(--muted);font-size:14.5px;margin-top:-6px">Der HTTP-Modus hat keine eigene Authentifizierung. Nur intern oder hinter einem geschützten Reverse Proxy betreiben.</p>
+        </div>
+        <div>
+          <h3>Erste Schritte im Harness</h3>
+          <pre><code>check_sources()
+import_reference_data('onet')
+get_role_context('Buchhalter', ort='Berlin')
+get_ats_jobs('https://jobs.lever.co/&lt;firma&gt;')
+get_changes(seit='7d')</code></pre>
+          <h3>Alle Tools</h3>
+          <ul class="tools">
+            <li><code>search_jobs</code>, <code>get_job_details</code></li>
+            <li><code>search_arbeitnow</code>, <code>get_ats_jobs</code></li>
+            <li><code>search_occupation</code>, <code>get_occupation</code></li>
+            <li><code>get_tasks</code>, <code>get_skills</code>, <code>crosswalk</code></li>
+            <li><code>get_salary</code>, <code>adzuna_salary</code></li>
+            <li><code>get_role_context</code></li>
+            <li><code>find_automation_signals</code></li>
+            <li><code>record_extraction</code>, <code>remember</code></li>
+            <li><code>search_knowledge</code>, <code>get_changes</code></li>
+            <li><code>get_history</code>, <code>knowledge_stats</code></li>
+            <li><code>graph_neighbors</code>, <code>export_knowledge</code></li>
+            <li><code>import_reference_data</code>, <code>commoncrawl_lookup</code></li>
+            <li><code>check_sources</code></li>
+          </ul>
+        </div>
+      </div>
+      <p class="sub">Ausführliche Dokumentation: <a href="https://github.com/GodModeAI2025/WorkMCP/blob/HEAD/README.md">README</a> und die <a href="https://github.com/GodModeAI2025/WorkMCP/tree/HEAD/docs/archivy">Archivy-Dokumentation</a>. Deren Notizen lassen sich direkt in eine <a href="https://github.com/archivy/archivy">Archivy</a>-Wissensdatenbank kopieren.</p>
+    </div>
+  </section>
+
+  <section id="recht">
+    <div class="wrap">
+      <div class="legal" role="note" aria-labelledby="recht-titel">
+        <h2 id="recht-titel">⚖️ Rechtlicher Hinweis: keine Rechtsberatung</h2>
+        <p>WorkMCP ist ein technisches Open-Source-Werkzeug. <strong>Es ist keine Rechtsberatung</strong> und ersetzt keine Prüfung im Einzelfall. Die Hinweise zu Lizenzen und Nutzungsbedingungen auf dieser Seite sind unverbindlich, ohne Gewähr für Vollständigkeit, Richtigkeit oder Aktualität.</p>
+        <ol>
+          <li><strong>Lizenzen und Bedingungen selbst prüfen.</strong> Wer WorkMCP betreibt oder nutzt, prüft selbst und vor der Nutzung, ob Abruf, Speicherung, Verarbeitung und Weitergabe der Daten der angebundenen Quellen zulässig sind. Dazu gehören insbesondere Lizenzen und Nutzungsbedingungen der Anbieter, robots.txt, Urheber- und Datenbankherstellerrechte (§§ 87a ff. UrhG), Marken, Datenschutz (DSGVO, BDSG) und vertragliche Pflichten gegenüber Dritten. Besonders wichtig ist das bei kommerzieller Nutzung, Veröffentlichung und automatisierten Massenabrufen.</li>
+          <li><strong>Keine zugesicherten Schnittstellen.</strong> Die Endpunkte der Bundesagentur für Arbeit (Jobsuche, BERUFENET, Entgeltatlas) sind keine offiziell angebotene oder zugesicherte API. Sie können sich jederzeit ändern oder gesperrt werden.</li>
+          <li><strong>Lizenzpflichten der Daten.</strong> Die MIT-Lizenz gilt nur für den Programmcode. Für Daten gelten die Bedingungen ihrer Quellen, z. B. CC BY 4.0 mit Namensnennung für O*NET, die Nutzungsbedingungen der Europäischen Kommission für ESCO und die Quellenangabe „Statistik der Bundesagentur für Arbeit“ für den Entgeltatlas. Quellenangaben und Lizenzhinweise übernehmen Nutzende selbst.</li>
+          <li><strong>Datenschutz.</strong> Stellenanzeigen können personenbezogene Daten enthalten. WorkMCP entfernt Kontaktfelder standardmäßig vor dem Speichern; Freitexte können dennoch Namen enthalten. Verantwortlich im Sinne der DSGVO ist, wer WorkMCP betreibt.</li>
+          <li><strong>Ergebnisse prüfen.</strong> Aufgabenlisten, Zuordnungen, Gehaltsangaben und Automatisierungsbewertungen können falsch, unvollständig oder veraltet sein; Automatisierungssignale sind Indizien, keine Belege. Werden sie für Personal- oder Organisationsentscheidungen genutzt, sind zusätzliche Pflichten selbst zu prüfen. Dazu zählen die KI-Verordnung (EU) 2024/1689 (Bereich Beschäftigung, Anhang III Nr. 4), Art. 22 DSGVO und die betriebliche Mitbestimmung (§ 87 Abs. 1 Nr. 6 BetrVG).</li>
+          <li><strong>Keine Haftung des MCP.</strong> Die Software wird ohne Gewährleistung bereitgestellt („as is“). Die Autorinnen, Autoren und Mitwirkenden haften nicht für Schäden aus der Nutzung von WorkMCP oder der abgerufenen Daten, soweit gesetzlich zulässig. Das schließt Rechtsverletzungen bei der Nutzung von Datenquellen ein. Zwingende gesetzliche Haftung bleibt unberührt, insbesondere bei Vorsatz, grober Fahrlässigkeit, bei der Verletzung von Leben, Körper oder Gesundheit und nach dem Produkthaftungsgesetz.</li>
+          <li><strong>Keine Verbindung zu Datenanbietern.</strong> WorkMCP ist unabhängig und steht in keiner Verbindung zur Bundesagentur für Arbeit, zur Europäischen Kommission, zum U.S. Department of Labor oder zu den genannten Plattformen. Namen und Marken dienen nur der Beschreibung; O*NET® ist eine Marke von USDOL/ETA.</li>
+        </ol>
+        <div class="note"><strong>Arbeitshilfe für die eigene Prüfung:</strong> Die Sammlung <a href="https://github.com/Klotzkette/claude-fuer-deutsches-recht">„Claude – Deutsche rechtliche Fähigkeiten“</a> enthält passende Module, etwa <code>datenschutzrecht</code>, <code>ki-vo-ai-act-pruefer</code>, <code>fachanwalt-it-recht</code> (Software-Lizenzen, Open Source), <code>fachanwalt-urheber-medienrecht</code> und <code>arbeitsrecht</code>. Auch sie ist ausdrücklich keine Rechtsberatung. Im Zweifel anwaltlichen Rat einholen.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>WorkMCP · MIT-Lizenz für den Code · Stand 29.10.2026</span>
+    <a href="https://github.com/GodModeAI2025/WorkMCP">GitHub</a>
+    <a href="https://github.com/GodModeAI2025/WorkMCP/blob/HEAD/README.md">README</a>
+    <a href="https://github.com/GodModeAI2025/WorkMCP/blob/HEAD/FAKTENCHECK.md">Faktencheck</a>
+    <a href="https://github.com/GodModeAI2025/WorkMCP/tree/HEAD/docs/archivy">Archivy-Doku</a>
+    <a href="https://github.com/GodModeAI2025/WorkMCP/blob/HEAD/LICENSE">Lizenz</a>
+  </div>
+</footer>
+</body>
+</html>

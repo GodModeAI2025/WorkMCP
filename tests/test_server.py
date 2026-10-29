@@ -54,12 +54,17 @@ async def test_anticipated_errors_reach_the_model(service: KnowledgeService) -> 
 
 async def test_record_extraction_with_nested_models(service: KnowledgeService) -> None:
     async with Client(create_server(service)) as client:
-        res = await client.call_tool("record_extraction", {
-            "bezug": "berufenet:58779",
-            "aufgaben": [{"text": "Belege kontieren", "anteil_wochenarbeitszeit": 0.3}],
-            "skills": ["DATEV"],
-            "automatisierungen": [{"aufgabe": "Belege kontieren", "signal": "https://example.com", "bewertung": 0.8}],
-        })
+        res = await client.call_tool(
+            "record_extraction",
+            {
+                "bezug": "berufenet:58779",
+                "aufgaben": [{"text": "Belege kontieren", "anteil_wochenarbeitszeit": 0.3}],
+                "skills": ["DATEV"],
+                "automatisierungen": [
+                    {"aufgabe": "Belege kontieren", "signal": "https://example.com", "bewertung": 0.8}
+                ],
+            },
+        )
         assert res.is_error is False
         data = res.structured_content
         assert data["aufgaben"][0]["aufgabe"] == "Belege kontieren"
