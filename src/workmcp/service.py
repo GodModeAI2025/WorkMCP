@@ -12,6 +12,7 @@ Every fetching operation goes through :meth:`KnowledgeService._run`:
 from __future__ import annotations
 
 import asyncio
+import re
 import time
 from collections.abc import Awaitable, Callable, Iterable
 from datetime import datetime, timedelta, timezone
@@ -105,7 +106,7 @@ class KnowledgeService(OccupationMixin):
         hash_ignore: Iterable[str] = (),
     ) -> OpResult:
         last = self.store.last_run(operation, params)
-        if last and not refresh and (self.settings.offline or last.age() < ttl):
+        if last and (self.settings.offline or (not refresh and last.age() < ttl)):
             return OpResult(
                 self.store.get_records(source, kind, last.result_keys),
                 True,
@@ -637,6 +638,8 @@ class KnowledgeService(OccupationMixin):
     ) -> dict[str, Any]:
         tags = "comment" if nur_kommentare else "(story,comment)"
         params = {"q": suchbegriff, "tags": tags, "tage": zeitraum_tage, "limit": limit}
+        if aufgabe_id:
+            aufgabe_id = self._task_ref(aufgabe_id)
 
         async def fetch() -> tuple[list[Item], dict[str, Any]]:
             raw = await self.hn.search(suchbegriff, tags=tags, hits=limit, since_days=zeitraum_tage)
@@ -684,6 +687,20 @@ class KnowledgeService(OccupationMixin):
             "Wochenarbeitszeit) record_extraction mit 'automatisierungen' nutzen.",
             "gedaechtnis": res.memory(),
         }
+
+    def _task_ref(self, ref: str) -> str:
+        """Existing node id, or a task node created from free text; unknown ids are rejected."""
+        ref = ref.strip()
+        if self.store.get_node(ref):
+            return ref
+        if re.match(r"^[a-z_]+:", ref):
+            raise ValueError(
+                f"Unbekannter Knoten {ref!r}. Knoten-IDs liefern get_tasks, search_knowledge oder "
+                "graph_neighbors; alternativ den Aufgabentext angeben."
+            )
+        node = g.task_id("extrahiert", g.short_hash(ref))
+        self.store.upsert_node(node, "Aufgabe", ref, {"quelle": "find_automation_signals"})
+        return node
 
     # -------------------------------------------------------- Common Crawl
 
