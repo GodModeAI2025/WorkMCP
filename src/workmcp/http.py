@@ -68,6 +68,7 @@ class HttpClient:
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
         data: dict[str, Any] | None = None,
+        json: Any = None,
     ) -> httpx.Response:
         clean = {k: v for k, v in (params or {}).items() if v is not None}
         host = urlsplit(url).netloc
@@ -75,7 +76,7 @@ class HttpClient:
         for attempt in range(self.retries):
             await self._pace(host)
             try:
-                resp = await self._client.request(method, url, params=clean, headers=headers, data=data)
+                resp = await self._client.request(method, url, params=clean, headers=headers, data=data, json=json)
             except httpx.TransportError as exc:
                 last_error = exc
             else:

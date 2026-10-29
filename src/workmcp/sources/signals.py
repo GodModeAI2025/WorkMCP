@@ -10,8 +10,15 @@ from ..http import HttpClient
 from ..textutil import html_to_text
 
 # Fields that change with every fetch without changing the substance of a post.
-HN_VOLATILE = ("points", "num_comments", "_highlightResult", "_rankingInfo", "updated_at", "children",
-               "relevancy_score")  # fmt: skip
+HN_VOLATILE = (
+    "points",
+    "num_comments",
+    "_highlightResult",
+    "_rankingInfo",
+    "updated_at",
+    "children",
+    "relevancy_score",
+)
 
 
 def normalize_hn_hit(hit: dict[str, Any]) -> dict[str, Any]:
@@ -38,8 +45,15 @@ class HackerNewsClient:
         self.http = http
         self.settings = settings
 
-    async def search(self, query: str, *, tags: str = "(story,comment)", hits: int = 20,
-                     since_days: int | None = None, by_date: bool = False) -> dict[str, Any]:  # fmt: skip
+    async def search(
+        self,
+        query: str,
+        *,
+        tags: str = "(story,comment)",
+        hits: int = 20,
+        since_days: int | None = None,
+        by_date: bool = False,
+    ) -> dict[str, Any]:
         params: dict[str, Any] = {"query": query, "tags": tags, "hitsPerPage": max(1, min(hits, 100))}
         if since_days:
             cutoff = int(datetime.now(timezone.utc).timestamp()) - since_days * 86400
@@ -67,8 +81,10 @@ def normalize_arbeitnow_job(job: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def arbeitnow_matches(job: dict[str, Any], was: str | None, wo: str | None) -> bool:
+def arbeitnow_matches(job: dict[str, Any], was: str | None, wo: str | None, remote_only: bool = False) -> bool:
     """Local filter: every word of ``was`` in title/tags/description, ``wo`` in location (or 'remote')."""
+    if remote_only and not job.get("remote"):
+        return False
     if was:
         haystack = " ".join([job.get("title") or "", " ".join(job.get("tags") or []), job.get("description") or ""])
         haystack = haystack.lower()
@@ -88,6 +104,9 @@ class ArbeitnowClient:
         self.http = http
         self.settings = settings
 
-    async def page(self, page: int = 1) -> dict[str, Any]:
-        raw = await self.http.get_json(self.settings.arbeitnow_url, params={"page": page})
+    async def page(self, page: int = 1, visa_sponsorship: bool | None = None) -> dict[str, Any]:
+        params: dict[str, Any] = {"page": page}
+        if visa_sponsorship:
+            params["visa_sponsorship"] = "true"
+        raw = await self.http.get_json(self.settings.arbeitnow_url, params=params)
         return raw if isinstance(raw, dict) else {"data": raw}

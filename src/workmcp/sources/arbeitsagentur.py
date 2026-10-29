@@ -28,24 +28,61 @@ ARBEITSZEIT = {"vollzeit": "vz", "teilzeit": "tz", "schicht": "snw", "homeoffice
 BEFRISTUNG = {"befristet": 1, "unbefristet": 2}
 
 ENTGELT_REGIONEN = {
-    "deutschland": 1, "ostdeutschland": 2, "westdeutschland": 3, "schleswig-holstein": 4, "hamburg": 5,
-    "niedersachsen": 6, "bremen": 7, "nordrhein-westfalen": 8, "nrw": 8, "hessen": 9, "rheinland-pfalz": 10,
-    "baden-württemberg": 11, "baden-wuerttemberg": 11, "bayern": 12, "saarland": 13, "berlin": 14,
-    "brandenburg": 15, "mecklenburg-vorpommern": 16, "sachsen": 17, "sachsen-anhalt": 18, "thüringen": 19,
-    "thueringen": 19, "dresden": 20, "düsseldorf": 21, "duesseldorf": 21, "dortmund": 22, "essen": 23,
-    "frankfurt am main": 24, "frankfurt": 24, "nürnberg": 25, "nuernberg": 25, "hannover": 26, "köln": 27,
-    "koeln": 27, "leipzig": 28, "münchen": 29, "muenchen": 29, "stuttgart": 30,
-}  # fmt: skip
+    "deutschland": 1,
+    "ostdeutschland": 2,
+    "westdeutschland": 3,
+    "schleswig-holstein": 4,
+    "hamburg": 5,
+    "niedersachsen": 6,
+    "bremen": 7,
+    "nordrhein-westfalen": 8,
+    "nrw": 8,
+    "hessen": 9,
+    "rheinland-pfalz": 10,
+    "baden-württemberg": 11,
+    "baden-wuerttemberg": 11,
+    "bayern": 12,
+    "saarland": 13,
+    "berlin": 14,
+    "brandenburg": 15,
+    "mecklenburg-vorpommern": 16,
+    "sachsen": 17,
+    "sachsen-anhalt": 18,
+    "thüringen": 19,
+    "thueringen": 19,
+    "dresden": 20,
+    "düsseldorf": 21,
+    "duesseldorf": 21,
+    "dortmund": 22,
+    "essen": 23,
+    "frankfurt am main": 24,
+    "frankfurt": 24,
+    "nürnberg": 25,
+    "nuernberg": 25,
+    "hannover": 26,
+    "köln": 27,
+    "koeln": 27,
+    "leipzig": 28,
+    "münchen": 29,
+    "muenchen": 29,
+    "stuttgart": 30,
+}
 ENTGELT_NIVEAUS = {"helfer": 1, "fachkraft": 2, "spezialist": 3, "experte": 4}
 ENTGELT_GESCHLECHT = {"gesamt": 1, "männer": 2, "maenner": 2, "frauen": 3}
 ENTGELT_ALTER = {"gesamt": 1, "unter 25": 2, "25 bis unter 55": 3, "ab 55": 4}
 ENTGELT_BRANCHEN = {
-    "gesamt": 1, "land- und forstwirtschaft, fischerei": 2, "produzierendes gewerbe ohne bau": 3,
-    "baugewerbe": 4, "handel, verkehr, lagerei und gastgewerbe": 5, "information und kommunikation": 6,
-    "finanz- und versicherungsgewerbe": 7, "grundstücks- und wohnungswesen": 8,
+    "gesamt": 1,
+    "land- und forstwirtschaft, fischerei": 2,
+    "produzierendes gewerbe ohne bau": 3,
+    "baugewerbe": 4,
+    "handel, verkehr, lagerei und gastgewerbe": 5,
+    "information und kommunikation": 6,
+    "finanz- und versicherungsgewerbe": 7,
+    "grundstücks- und wohnungswesen": 8,
     "erbringung wirtschaftlicher dienstleistungen": 9,
-    "öffentliche verwaltung, schul-, gesundheits-, sozialwesen": 10, "sonstige dienstleistungen": 11,
-}  # fmt: skip
+    "öffentliche verwaltung, schul-, gesundheits-, sozialwesen": 10,
+    "sonstige dienstleistungen": 11,
+}
 
 _KLDB_RE = re.compile(r"(?<!\d)(\d{5})(?!\d)")
 _KLDB_ANY_RE = re.compile(r"(?<!\d)(\d{3,5})(?!\d)")
@@ -107,8 +144,10 @@ def build_search_params(
         "size": max(1, min(size, 100)),
     }
     if befristung is not None:
-        codes = [str(resolve_code(b.strip() if isinstance(b, str) else b, BEFRISTUNG, "Befristung"))
-                 for b in as_list(befristung)]  # fmt: skip
+        codes = [
+            str(resolve_code(b.strip() if isinstance(b, str) else b, BEFRISTUNG, "Befristung"))
+            for b in as_list(befristung)
+        ]
         params["befristung"] = ";".join(codes) or None
     if arbeitszeit is not None:
         codes = []
@@ -358,9 +397,17 @@ def find_kldb(doc: Any) -> str | None:
 
 
 _TITLE_KEYS = (
-    "ueberschrift", "überschrift", "titel", "title", "name", "kurzBezeichnungNeutral", "bezeichnungNeutral",
-    "bezeichnung", "label", "kurzBezeichnung",
-)  # fmt: skip
+    "ueberschrift",
+    "überschrift",
+    "titel",
+    "title",
+    "name",
+    "kurzBezeichnungNeutral",
+    "bezeichnungNeutral",
+    "bezeichnung",
+    "label",
+    "kurzBezeichnung",
+)
 _CONTENT_KEYS = ("inhalt", "content", "text", "beschreibung", "html", "value", "langtext", "infotext", "wert")
 
 

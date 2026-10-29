@@ -93,6 +93,15 @@ class Settings:
         default_factory=lambda: _env("COMMONCRAWL_DATA", "https://data.commoncrawl.org") or ""
     )
 
+    # Adzuna (optional): free developer key from https://developer.adzuna.com – without it the tools stay inactive
+    adzuna_app_id: str | None = field(default_factory=lambda: _env("ADZUNA_APP_ID"))
+    adzuna_app_key: str | None = field(default_factory=lambda: _env("ADZUNA_APP_KEY"))
+    adzuna_base: str = field(default_factory=lambda: _env("ADZUNA_BASE", "https://api.adzuna.com/v1/api") or "")
+    adzuna_country: str = field(default_factory=lambda: _env("ADZUNA_COUNTRY", "de") or "de")
+
+    # job details can contain contact persons; they are removed before storing unless enabled
+    store_personal_data: bool = field(default_factory=lambda: _env_bool("STORE_PERSONAL_DATA"))
+
     # optional default locations of reference files (URL or local path)
     kldb_source: str | None = field(default_factory=lambda: _env("KLDB_SOURCE"))
     kldb_isco_source: str | None = field(default_factory=lambda: _env("KLDB_ISCO_SOURCE"))

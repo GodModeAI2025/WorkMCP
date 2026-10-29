@@ -571,6 +571,19 @@ class KnowledgeStore:
             ).fetchall()
         return [self._row_to_record(r) for r in rows]
 
+    def keys(self, source: str, kind: str, *, status: str | None = None, key_prefix: str | None = None) -> list[str]:
+        """Keys only (cheap) – used to detect records that vanished from a re-imported dataset."""
+        clauses, args = ["source = ?", "kind = ?"], [source, kind]
+        if status:
+            clauses.append("status = ?")
+            args.append(status)
+        if key_prefix:
+            clauses.append("key LIKE ? ESCAPE '\\'")
+            args.append(key_prefix.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%")
+        with self._lock:
+            rows = self._conn.execute(f"SELECT key FROM records WHERE {' AND '.join(clauses)} ORDER BY id", args)
+            return [r[0] for r in rows.fetchall()]
+
     def count_records(self, source: str | None = None, kind: str | None = None) -> int:
         clauses, args = [], []
         if source:

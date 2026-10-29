@@ -62,12 +62,26 @@ def test_encode_refnr_matches_documented_example() -> None:
 
 
 def test_build_search_params() -> None:
-    params = ba.build_search_params(was="Koch", wo="Köln", umkreis=25, arbeitszeit=["vollzeit", "homeoffice"],
-                                    befristung="unbefristet", zeitarbeit=False, size=500)  # fmt: skip
+    params = ba.build_search_params(
+        was="Koch",
+        wo="Köln",
+        umkreis=25,
+        arbeitszeit=["vollzeit", "homeoffice"],
+        befristung="unbefristet",
+        zeitarbeit=False,
+        size=500,
+    )
     assert params == {
-        "was": "Koch", "wo": "Köln", "umkreis": 25, "angebotsart": 1, "page": 1, "size": 100,
-        "arbeitszeit": "vz;ho", "befristung": "2", "zeitarbeit": "false",
-    }  # fmt: skip
+        "was": "Koch",
+        "wo": "Köln",
+        "umkreis": 25,
+        "angebotsart": 1,
+        "page": 1,
+        "size": 100,
+        "arbeitszeit": "vz;ho",
+        "befristung": "2",
+        "zeitarbeit": "false",
+    }
     assert "umkreis" not in ba.build_search_params(was="Koch", umkreis=25)
     assert ba.build_search_params(angebotsart="ausbildung")["angebotsart"] == 4
     with pytest.raises(ValueError):
@@ -187,17 +201,19 @@ def _xlsx(rows: list[list[object]]) -> bytes:
 
 
 def test_parse_kldb_xlsx_with_title_rows() -> None:
-    content = _xlsx([
-        ["Klassifikation der Berufe 2010 – überarbeitete Fassung 2020"],
-        [],
-        ["Schlüssel KldB 2010, V. 2020", "Ebene", "Titel"],
-        ["4", 1, "Naturwissenschaft, Geografie und Informatik"],
-        ["43", 2, "Informatik-, Informations- und Kommunikationstechnologieberufe"],
-        ["434", 3, "Softwareentwicklung und Programmierung"],
-        ["4341", 4, "Berufe in der Softwareentwicklung"],
-        ["43413", 5, "Berufe in der Softwareentwicklung - komplexe Spezialistentätigkeiten"],
-        [1104, 5, "Führung Militär (Zahl ohne führende Null)"],
-    ])  # fmt: skip
+    content = _xlsx(
+        [
+            ["Klassifikation der Berufe 2010 – überarbeitete Fassung 2020"],
+            [],
+            ["Schlüssel KldB 2010, V. 2020", "Ebene", "Titel"],
+            ["4", 1, "Naturwissenschaft, Geografie und Informatik"],
+            ["43", 2, "Informatik-, Informations- und Kommunikationstechnologieberufe"],
+            ["434", 3, "Softwareentwicklung und Programmierung"],
+            ["4341", 4, "Berufe in der Softwareentwicklung"],
+            ["43413", 5, "Berufe in der Softwareentwicklung - komplexe Spezialistentätigkeiten"],
+            [1104, 5, "Führung Militär (Zahl ohne führende Null)"],
+        ]
+    )
     rows = tables.read_table(content, "kldb.xlsx")
     parsed = {r["code"]: r for r in tables.parse_kldb(rows)}
     assert parsed["434"]["ebene_name"] == "Berufsgruppe"
@@ -224,15 +240,25 @@ def test_parse_esco_onet_by_value_shape() -> None:
     rows = [
         ["ESCO URI", "ESCO Title", "O*NET Id", "O*NET Title", "Type of Match"],
         [fx.ESCO_OCC_URI, "accountant", "13-2011.00", "Accountants and Auditors", "exactMatch"],
-        ["http://data.europa.eu/esco/occupation/ccc", "software developer", "15-1252.00", "Software Developers",
-         "closeMatch"],
+        [
+            "http://data.europa.eu/esco/occupation/ccc",
+            "software developer",
+            "15-1252.00",
+            "Software Developers",
+            "closeMatch",
+        ],
         ["http://data.europa.eu/esco/occupation/ddd", "x", "15-1252.00", "Software Developers", "broadMatch"],
         ["not a uri", "x", "nope", "", ""],
-    ]  # fmt: skip
+    ]
     parsed = tables.parse_esco_onet(rows)
     assert len(parsed) == 3
-    assert parsed[0] == {"esco_uri": fx.ESCO_OCC_URI, "onet_soc": "13-2011.00", "esco_titel": "accountant",
-                         "onet_titel": "Accountants and Auditors", "art": "exactMatch"}  # fmt: skip
+    assert parsed[0] == {
+        "esco_uri": fx.ESCO_OCC_URI,
+        "onet_soc": "13-2011.00",
+        "esco_titel": "accountant",
+        "onet_titel": "Accountants and Auditors",
+        "art": "exactMatch",
+    }
 
 
 def test_read_table_rejects_old_xls() -> None:

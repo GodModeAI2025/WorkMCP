@@ -101,8 +101,9 @@ def _col_by_header(header: Sequence[str], keywords: Sequence[str], exclude: Sequ
     return None
 
 
-def _col_by_values(rows: Sequence[Sequence[str]], predicate: Callable[[str], bool], min_share: float = 0.6,
-                   skip: Sequence[int] = ()) -> int | None:  # fmt: skip
+def _col_by_values(
+    rows: Sequence[Sequence[str]], predicate: Callable[[str], bool], min_share: float = 0.6, skip: Sequence[int] = ()
+) -> int | None:
     width = max((len(r) for r in rows), default=0)
     best, best_share = None, 0.0
     for col in range(width):
@@ -228,8 +229,9 @@ def parse_esco_onet(rows: Sequence[Sequence[str]]) -> list[dict[str, Any]]:
         return []
     header_idx = _find_header(rows, ("esco",), ("onet", "o*net", "soc"))
     header = rows[header_idx] if header_idx is not None else []
-    esco_title = _col_by_header(header, ("esco title", "esco label", "esco occupation title", "esco_title",
-                                         "esco preferred"))  # fmt: skip
+    esco_title = _col_by_header(
+        header, ("esco title", "esco label", "esco occupation title", "esco_title", "esco preferred")
+    )
     onet_title = _col_by_header(
         header, ("onet title", "o*net title", "onet-soc title", "onet_title", "o*net-soc title")
     )

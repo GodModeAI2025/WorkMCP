@@ -167,8 +167,9 @@ class EscoClient:
             params["selectedVersion"] = self.settings.esco_version
         return params
 
-    async def search(self, text: str, *, type_: str = "occupation", language: str = "de", limit: int = 10,
-                     offset: int = 0) -> dict[str, Any]:  # fmt: skip
+    async def search(
+        self, text: str, *, type_: str = "occupation", language: str = "de", limit: int = 10, offset: int = 0
+    ) -> dict[str, Any]:
         raw = await self.http.get_json(
             self.settings.esco_base + "/search",
             params=self._params(text=text, type=type_, language=language, limit=limit, offset=offset, full="false"),

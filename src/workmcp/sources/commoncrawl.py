@@ -67,8 +67,9 @@ class CommonCrawlClient:
         raw = await self.http.get_json(f"{self.settings.commoncrawl_index}/collinfo.json")
         return [c for c in raw if isinstance(c, dict)] if isinstance(raw, list) else []
 
-    async def query(self, crawl_id: str, url_pattern: str, *, limit: int = 20,
-                    filters: list[str] | None = None) -> list[dict[str, Any]]:  # fmt: skip
+    async def query(
+        self, crawl_id: str, url_pattern: str, *, limit: int = 20, filters: list[str] | None = None
+    ) -> list[dict[str, Any]]:
         params: dict[str, Any] = {"url": url_pattern, "output": "json", "limit": limit}
         if filters:
             params["filter"] = filters
